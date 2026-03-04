@@ -11,8 +11,9 @@
         .sug-item:hover { background-color: #f3f4f6; }
     </style>
 </head>
-<body class="bg-gray-100 font-sans p-4">
+<body class="bg-gray-100 font-sans p-4 pb-0 min-h-screen flex flex-col">
 
+<div class="flex-grow">
     <div class="max-w-4xl mx-auto">
         <header class="mb-8 text-center">
             <h1 class="text-3xl font-black text-blue-800 tracking-tight text-center uppercase">PRO100 - Démos konvertor</h1>
@@ -33,15 +34,15 @@
         <div id="resultArea" class="hidden space-y-4">
             <div class="flex justify-between items-center bg-slate-900 text-white p-4 rounded-xl shadow-lg">
                 <div id="statusText" class="text-sm font-bold uppercase tracking-widest text-blue-400">Párování...</div>
-                <button id="downloadBtn" class="bg-green-500 hover:bg-green-600 px-8 py-3 rounded-xl font-black uppercase tracking-wider transition shadow-lg text-center">Exportovat _demos.csv</button>
+                <button id="downloadBtn" class="bg-green-500 hover:bg-green-600 px-8 py-3 rounded-xl font-black uppercase tracking-wider transition shadow-lg text-center">Exportovat</button>
             </div>
 
             <div class="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
                 <table class="w-full text-left text-sm">
                     <thead class="bg-gray-50 border-b text-gray-400 uppercase text-[10px] font-black tracking-widest text-center">
                         <tr>
-                            <th class="p-4">Projekt (Materiál)</th>
-                            <th class="p-4 w-16 text-center">Tl.</th>
+                            <th class="p-4">Materiál</th>
+                            <th class="p-4 w-16 text-center">Tloušťka</th>
                             <th class="p-4">Dílec</th>
                             <th class="p-4 w-72">Démos Kód</th>
                         </tr>
@@ -50,8 +51,14 @@
                 </table>
             </div>
         </div>
-    </div>
+        </div>
 
+    </div>
+<footer class="max-w-4xl mx-auto mt-12 mb-8 text-center text-gray-400 text-xs font-medium w-full">
+        <div class="border-t border-gray-200 pt-6">
+            <p>© <span id="currentYear"></span> <a href="https://beraanek.cz/" target="_blank" class="text-blue-500 hover:text-blue-700 hover:underline transition-colors">Daniel Beránek</a></p>
+        </div>
+    </footer>
     <script>
         let DB = [];
         let currentRows = [];
@@ -207,6 +214,9 @@
             a.download = `${originalFileName}_demos.csv`;
             a.click();
         };
+
+        // Nastavení aktuálního roku v patičce
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
     </script>
 </body>
 </html>
