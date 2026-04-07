@@ -15,208 +15,223 @@
 </head>
 <body class="bg-slate-100 min-h-screen p-4 md:p-8 font-sans text-slate-900">
 
-    <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10 border border-slate-200">
-        <div class="flex flex-col md:flex-row justify-between items-center border-b border-slate-100 pb-8 mb-8 gap-4">
-            <div>
-                <h1 class="text-3xl font-black tracking-tight text-slate-800">Démos <span class="text-blue-600">Konvertor</span> v2.0</h1>
-                <p id="dbStatus" class="text-sm text-slate-400 font-medium mt-1 font-mono italic">Načítám databázi...</p>
-            </div>
-            <button id="downloadBtn" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-lg active:scale-95">Uložit Export (CSV)</button>
+<div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10 border border-slate-200">
+    <div class="flex flex-col md:flex-row justify-between items-center border-b border-slate-100 pb-8 mb-8 gap-4">
+        <div>
+            <h1 class="text-3xl font-black tracking-tight text-slate-800">Démos <span class="text-blue-600">Konvertor</span> v2.0</h1>
+            <p id="dbStatus" class="text-sm text-slate-400 font-medium mt-1 font-mono italic">Načítám databázi...</p>
         </div>
+        <button id="downloadBtn" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-lg active:scale-95">Uložit Export (CSV)</button>
+    </div>
 
-        <div id="dropZone" class="drop-area mb-10 border-4 border-dashed border-slate-200 rounded-3xl p-12 transition-all cursor-pointer group hover:border-blue-400 bg-slate-50 flex flex-col items-center justify-center text-center">
-            <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-8 h-8">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
-                </svg>
-            </div>
-            <h2 class="text-xl font-bold text-slate-700 mb-1">Přetáhni CSV z PRO100</h2>
-            <p class="text-slate-400 text-sm">Nebo klikni a vyber soubor ručně</p>
-            <input type="file" id="csvFile" accept=".csv" class="hidden">
+    <div id="dropZone" class="drop-area mb-10 border-4 border-dashed border-slate-200 rounded-3xl p-12 transition-all cursor-pointer group hover:border-blue-400 bg-slate-50 flex flex-col items-center justify-center text-center">
+        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-8 h-8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 16.5V9.75m0 0l3 3m-3-3l-3 3M6.75 19.5a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" />
+            </svg>
         </div>
+        <h2 class="text-xl font-bold text-slate-700 mb-1">Přetáhni CSV z PRO100</h2>
+        <p class="text-slate-400 text-sm">Nebo klikni a vyber soubor ručně</p>
+        <input type="file" id="csvFile" accept=".csv" class="hidden">
+    </div>
 
-        <div id="statsArea" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 text-center text-white">
-            <div class="bg-emerald-500 p-6 rounded-2xl shadow-md border-b-4 border-emerald-700">
-                <span class="text-xs uppercase font-bold opacity-80">Spárováno</span>
-                <b id="statOk" class="block text-4xl mt-1 font-mono">0</b>
-            </div>
-            <div class="bg-rose-500 p-6 rounded-2xl shadow-md border-b-4 border-rose-700">
-                <span class="text-xs uppercase font-bold opacity-80">Nenalezeno</span>
-                <b id="statMiss" class="block text-4xl mt-1 font-mono">0</b>
-            </div>
-            <div class="bg-slate-700 p-6 rounded-2xl shadow-md border-b-4 border-slate-900">
-                <span class="text-xs uppercase font-bold opacity-80">Celkem</span>
-                <b id="statTotal" class="block text-4xl mt-1 font-mono">0</b>
-            </div>
+    <div id="statsArea" class="hidden grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 text-center text-white">
+        <div class="bg-emerald-500 p-6 rounded-2xl shadow-md border-b-4 border-emerald-700">
+            <span class="text-xs uppercase font-bold opacity-80">Spárováno</span>
+            <b id="statOk" class="block text-4xl mt-1 font-mono">0</b>
         </div>
-
-        <div id="tableWrapper" class="hidden overflow-x-auto rounded-2xl border border-slate-200 shadow-inner">
-            <table id="resultTable" class="w-full text-left border-collapse bg-white">
-                <thead class="bg-slate-800 text-white text-[10px] font-black uppercase tracking-widest">
-                    <tr>
-                        <th class="px-6 py-4">Kód Démos</th>
-                        <th class="px-6 py-4">Dílec / Poznámka (PRO100)</th>
-                        <th class="px-6 py-4 text-center">Tloušťka</th>
-                        <th class="px-6 py-4 text-right">Stav</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100"></tbody>
-            </table>
+        <div class="bg-rose-500 p-6 rounded-2xl shadow-md border-b-4 border-rose-700">
+            <span class="text-xs uppercase font-bold opacity-80">Nenalezeno</span>
+            <b id="statMiss" class="block text-4xl mt-1 font-mono">0</b>
+        </div>
+        <div class="bg-slate-700 p-6 rounded-2xl shadow-md border-b-4 border-slate-900">
+            <span class="text-xs uppercase font-bold opacity-80">Celkem</span>
+            <b id="statTotal" class="block text-4xl mt-1 font-mono">0</b>
         </div>
     </div>
 
-    <script>
-        let DB = [];
-        let exportRows = [];
+    <div id="tableWrapper" class="hidden overflow-x-auto rounded-2xl border border-slate-200 shadow-inner">
+        <table id="resultTable" class="w-full text-left border-collapse bg-white">
+            <thead class="bg-slate-800 text-white text-[10px] font-black uppercase tracking-widest">
+            <tr>
+                <th class="px-6 py-4">Kód Démos</th>
+                <th class="px-6 py-4">Dílec / Poznámka (PRO100)</th>
+                <th class="px-6 py-4 text-center">Tloušťka</th>
+                <th class="px-6 py-4 text-right">Stav</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100"></tbody>
+        </table>
+    </div>
+</div>
 
-        // 1. Načtení DB
-        fetch('demos_db.json')
-            .then(r => r.json())
-            .then(data => {
-                DB = data.filter(i => i && (i.d || i.c));
-                document.getElementById('dbStatus').innerText = `✅ Databáze připravena (${DB.length} položek)`;
-                document.getElementById('dbStatus').classList.add('text-emerald-500');
-            })
-            .catch(e => {
-                document.getElementById('dbStatus').innerText = "❌ CHYBA: demos_db.json chybí!";
-                document.getElementById('dbStatus').classList.add('text-rose-500', 'font-bold');
+<script>
+    let DB = [];
+    let exportRows = [];
+    let inputFileName = "export";
+
+    // 1. Načtení DB
+    fetch('demos_db.json')
+        .then(r => r.json())
+        .then(data => {
+            DB = data.filter(i => i && (i.d || i.c));
+            document.getElementById('dbStatus').innerText = `✅ Databáze připravena (${DB.length} položek)`;
+            document.getElementById('dbStatus').classList.add('text-emerald-500');
+        })
+        .catch(e => {
+            document.getElementById('dbStatus').innerText = "❌ CHYBA: demos_db.json chybí!";
+            document.getElementById('dbStatus').classList.add('text-rose-500', 'font-bold');
+        });
+
+    // 2. Drag & Drop Logika
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('csvFile');
+
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('drag-over');
+    });
+
+    ['dragleave', 'dragend'].forEach(type => {
+        dropZone.addEventListener(type, () => dropZone.classList.remove('drag-over'));
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file && file.name.endsWith('.csv')) handleFile(file);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files[0]) handleFile(e.target.files[0]);
+    });
+
+    function handleFile(file) {
+        // Tady si uložíme název původního souboru bez .csv
+        inputFileName = file.name.replace(/\.[^/.]+$/, "");
+
+        const reader = new FileReader();
+        reader.onload = (ev) => processData(ev.target.result);
+        reader.readAsText(file, 'windows-1250');
+    }
+
+    // 3. Zpracování dat
+    function processData(text) {
+        const lines = text.split(/\r?\n/).filter(l => l.trim().length > 10);
+        const tbody = document.querySelector('#resultTable tbody');
+        tbody.innerHTML = '';
+        let ok = 0, miss = 0; exportRows = [];
+
+        lines.forEach((line) => {
+            const cols = line.split(';').map(c => c.trim().replace(/^"|"$/g, ''));
+            if (cols.length < 8) return;
+
+            const pNameOrig = cols[0];
+            const pNameUpper = pNameOrig.toUpperCase().replace(/_/g, " ");
+            const pW = cols[1]; const pH = cols[3]; const pT = cols[5];
+            const pCount = parseInt(cols[6]) || 1;
+            const pMat = cols[7]; const matUpper = pMat.toUpperCase();
+
+            let rawT = parseFloat(pT.replace(',', '.'));
+            let targetT = Math.floor(rawT);
+            let targetCat = "DTDL"; let isTupl = "NE";
+
+            if (pNameUpper.includes("HDF") || pNameUpper.includes("ZADA") || targetT === 3) {
+                targetT = 3; targetCat = "HDF";
+            } else if (pNameUpper.includes("TUPL") || targetT === 36) {
+                targetT = 18; targetCat = "DTDL"; isTupl = "ANO";
+            } else if (pNameUpper.includes("PRACOVNI") || pNameUpper.includes("PD")) {
+                targetCat = "PD"; targetT = 38;
+            } else if (pNameUpper.includes("ZASTENA")) {
+                targetCat = "ZASTENA"; targetT = 10;
+            }
+
+            let match = DB.find(item => {
+                const dCode = (item.d || "").toUpperCase();
+                const dId = (item.c || "").toUpperCase();
+                const dMatch = (dCode && matUpper.includes(dCode)) || (dId && matUpper.includes(dId));
+                return dMatch && parseInt(item.t) === targetT && item.cat === targetCat;
             });
 
-        // 2. Drag & Drop Logika
-        const dropZone = document.getElementById('dropZone');
-        const fileInput = document.getElementById('csvFile');
-
-        dropZone.addEventListener('click', () => fileInput.click());
-
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-        });
-
-        ['dragleave', 'dragend'].forEach(type => {
-            dropZone.addEventListener(type, () => dropZone.classList.remove('drag-over'));
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            const file = e.dataTransfer.files[0];
-            if (file && file.name.endsWith('.csv')) handleFile(file);
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files[0]) handleFile(e.target.files[0]);
-        });
-
-        function handleFile(file) {
-            const reader = new FileReader();
-            reader.onload = (ev) => processData(ev.target.result);
-            reader.readAsText(file, 'windows-1250');
-        }
-
-        // 3. Zpracování dat
-        function processData(text) {
-            const lines = text.split(/\r?\n/).filter(l => l.trim().length > 10);
-            const tbody = document.querySelector('#resultTable tbody');
-            tbody.innerHTML = '';
-            let ok = 0, miss = 0; exportRows = [];
-
-            lines.forEach((line) => {
-                const cols = line.split(';').map(c => c.trim().replace(/^"|"$/g, ''));
-                if (cols.length < 8) return;
-
-                const pNameOrig = cols[0];
-                const pNameUpper = pNameOrig.toUpperCase().replace(/_/g, " ");
-                const pW = cols[1]; const pH = cols[3]; const pT = cols[5];
-                const pCount = parseInt(cols[6]) || 1;
-                const pMat = cols[7]; const matUpper = pMat.toUpperCase();
-
-                let rawT = parseFloat(pT.replace(',', '.'));
-                let targetT = Math.floor(rawT);
-                let targetCat = "DTDL"; let isTupl = "NE";
-
-                if (pNameUpper.includes("HDF") || pNameUpper.includes("ZADA") || targetT === 3) {
-                    targetT = 3; targetCat = "HDF";
-                } else if (pNameUpper.includes("TUPL") || targetT === 36) {
-                    targetT = 18; targetCat = "DTDL"; isTupl = "ANO";
-                } else if (pNameUpper.includes("PRACOVNI") || pNameUpper.includes("PD")) {
-                    targetCat = "PD"; targetT = 38;
-                } else if (pNameUpper.includes("ZASTENA")) {
-                    targetCat = "ZASTENA"; targetT = 10;
-                }
-
-                let match = DB.find(item => {
+            if (!match) {
+                match = DB.find(item => {
                     const dCode = (item.d || "").toUpperCase();
                     const dId = (item.c || "").toUpperCase();
                     const dMatch = (dCode && matUpper.includes(dCode)) || (dId && matUpper.includes(dId));
-                    return dMatch && parseInt(item.t) === targetT && item.cat === targetCat;
+                    return dMatch && parseInt(item.t) === targetT;
                 });
+            }
 
-                if (!match) {
-                    match = DB.find(item => {
-                        const dCode = (item.d || "").toUpperCase();
-                        const dId = (item.c || "").toUpperCase();
-                        const dMatch = (dCode && matUpper.includes(dCode)) || (dId && matUpper.includes(dId));
-                        return dMatch && parseInt(item.t) === targetT;
-                    });
-                }
+            const poznamkaFinal = `${pMat}, ${pT}mm`;
+            if (match) {
+                ok++;
+                addRowToTable(match, pNameOrig, pT, isTupl, poznamkaFinal);
+                exportRows.push([match.c, pNameOrig, pW, pH, pCount, "", "", "", "", "", isTupl, poznamkaFinal]);
+            } else {
+                miss++;
+                addErrorRowToTable(pNameOrig, pMat, pT, poznamkaFinal);
+            }
+        });
 
-                const poznamkaFinal = `${pMat}, ${pT}mm`;
-                if (match) {
-                    ok++;
-                    addRowToTable(match, pNameOrig, pT, isTupl, poznamkaFinal);
-                    exportRows.push([match.c, pNameOrig, pW, pH, pCount, "", "", "", "", "", isTupl, poznamkaFinal]);
-                } else {
-                    miss++;
-                    addErrorRowToTable(pNameOrig, pMat, pT, poznamkaFinal);
-                }
-            });
+        document.getElementById('statOk').innerText = ok;
+        document.getElementById('statMiss').innerText = miss;
+        document.getElementById('statTotal').innerText = ok + miss;
+        document.getElementById('statsArea').classList.remove('hidden');
+        document.getElementById('tableWrapper').classList.remove('hidden');
+        document.getElementById('downloadBtn').classList.toggle('hidden', ok === 0);
 
-            document.getElementById('statOk').innerText = ok;
-            document.getElementById('statMiss').innerText = miss;
-            document.getElementById('statTotal').innerText = ok + miss;
-            document.getElementById('statsArea').classList.remove('hidden');
-            document.getElementById('tableWrapper').classList.remove('hidden');
-            document.getElementById('downloadBtn').classList.toggle('hidden', ok === 0);
+        // Scroll dolů k výsledkům
+        document.getElementById('statsArea').scrollIntoView({ behavior: 'smooth' });
+    }
 
-            // Scroll dolů k výsledkům
-            document.getElementById('statsArea').scrollIntoView({ behavior: 'smooth' });
-        }
-
-        function addRowToTable(match, pName, pT, isTupl, poznamka) {
-            const tr = document.createElement('tr');
-            tr.className = "hover:bg-blue-50 transition-colors";
-            tr.innerHTML = `
+    function addRowToTable(match, pName, pT, isTupl, poznamka) {
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-blue-50 transition-colors";
+        tr.innerHTML = `
                 <td class="px-6 py-4 font-mono font-bold text-blue-600">${match.c}</td>
                 <td class="px-6 py-4"><div class="text-sm font-bold text-slate-800">${pName}</div><div class="text-[10px] text-slate-400 italic">${poznamka}</div></td>
                 <td class="px-6 py-4 text-center font-mono text-xs text-slate-500">${pT} mm</td>
                 <td class="px-6 py-4 text-right"><span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded text-[9px] font-black border border-emerald-200 uppercase">${isTupl === 'ANO' ? 'TUPL OK' : 'OK'}</span></td>
             `;
-            document.querySelector('#resultTable tbody').appendChild(tr);
-        }
+        document.querySelector('#resultTable tbody').appendChild(tr);
+    }
 
-        function addErrorRowToTable(pName, pMat, pT, poznamka) {
-            const tr = document.createElement('tr');
-            tr.className = "bg-rose-50/50";
-            tr.innerHTML = `
+    function addErrorRowToTable(pName, pMat, pT, poznamka) {
+        const tr = document.createElement('tr');
+        tr.className = "bg-rose-50/50";
+        tr.innerHTML = `
                 <td class="px-6 py-4 text-rose-300 italic text-xs">Nenalezeno</td>
                 <td class="px-6 py-4"><div class="text-sm font-bold text-slate-400">${pName}</div><div class="text-[10px] text-rose-400 italic font-bold underline">${poznamka}</div></td>
                 <td class="px-6 py-4 text-center font-mono text-xs text-slate-300">${pT} mm</td>
                 <td class="px-6 py-4 text-right"><span class="bg-rose-500 text-white px-3 py-1 rounded text-[9px] font-black uppercase shadow-sm">MISS</span></td>
             `;
-            document.querySelector('#resultTable tbody').appendChild(tr);
-        }
+        document.querySelector('#resultTable tbody').appendChild(tr);
+    }
 
-        document.getElementById('downloadBtn').addEventListener('click', function() {
-            const header = "KOD MATERIALU;NÁZEV;DÉLKA;ŠÍŘKA;POČET KS;MÁ LÉTA;HRANA PŘEDNÍ KOD;HRANA ZADNI KOD;HRANA LEVA KOD;HRANA PRAVA KOD;TUPLOVANÁ DESKA;POZNÁMKA\n";
-            let csv = header;
-            exportRows.forEach(r => csv += r.join(';') + "\n");
-            const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.href = URL.createObjectURL(blob);
-            link.download = `demos_export_${new Date().toLocaleDateString().replace(/\s/g, '')}.csv`;
-            link.click();
-        });
-    </script>
+    document.getElementById('downloadBtn').addEventListener('click', function() {
+        const now = new Date();
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        const dd = String(now.getDate()).padStart(2, '0');
+        const yyyy = now.getFullYear();
+        const hh = String(now.getHours()).padStart(2, '0');
+        const min = String(now.getMinutes()).padStart(2, '0');
+        const ss = String(now.getSeconds()).padStart(2, '0');
+
+        // Pro název souboru musíme použít tečky nebo pomlčky místo dvojteček
+        const timeStamp = `${mm}-${dd}-${yyyy}_${hh}-${min}-${ss}`;
+
+        const header = "KOD MATERIALU;NÁZEV;DÉLKA;ŠÍŘKA;POČET KS;MÁ LÉTA;HRANA PŘEDNÍ KOD;HRANA ZADNI KOD;HRANA LEVA KOD;HRANA PRAVA KOD;TUPLOVANÁ DESKA;POZNÁMKA\n";
+        let csv = header;
+        exportRows.forEach(r => csv += r.join(';') + "\n");
+        const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = `${inputFileName}_demos_export_${timeStamp}.csv`;
+        link.click();
+    });
+</script>
 </body>
 </html>
