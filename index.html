@@ -3,13 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Démos Konvertor v2.0</title>
+    <title>Démos Konvertor v2.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .drop-area.drag-over {
             border-color: #2563eb;
             background-color: #eff6ff;
             transform: scale(1.01);
+        }
+        /* Přidal jsem jen decentní focus, aby bylo vidět, co edituješ */
+        [contenteditable="true"]:focus {
+            outline: 2px solid #2563eb;
+            background: #fff;
         }
     </style>
 </head>
@@ -18,7 +23,7 @@
 <div class="max-w-6xl mx-auto bg-white rounded-2xl shadow-2xl p-6 md:p-10 border border-slate-200">
     <div class="flex flex-col md:flex-row justify-between items-center border-b border-slate-100 pb-8 mb-8 gap-4">
         <div>
-            <h1 class="text-3xl font-black tracking-tight text-slate-800">Démos <span class="text-blue-600">Konvertor</span> v2.0</h1>
+            <h1 class="text-3xl font-black tracking-tight text-slate-800">Démos <span class="text-blue-600">Konvertor</span> v2.1</h1>
             <p id="dbStatus" class="text-sm text-slate-400 font-medium mt-1 font-mono italic">Načítám databázi...</p>
         </div>
         <button id="downloadBtn" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-2xl font-black text-sm uppercase tracking-widest transition-all shadow-lg active:scale-95">Uložit Export (CSV)</button>
@@ -67,10 +72,8 @@
 
 <script>
     let DB = [];
-    let exportRows = [];
     let inputFileName = "export";
 
-    // 1. Načtení DB
     fetch('demos_db.json')
         .then(r => r.json())
         .then(data => {
@@ -83,47 +86,31 @@
             document.getElementById('dbStatus').classList.add('text-rose-500', 'font-bold');
         });
 
-    // 2. Drag & Drop Logika
     const dropZone = document.getElementById('dropZone');
     const fileInput = document.getElementById('csvFile');
-
     dropZone.addEventListener('click', () => fileInput.click());
-
-    dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('drag-over');
-    });
-
-    ['dragleave', 'dragend'].forEach(type => {
-        dropZone.addEventListener(type, () => dropZone.classList.remove('drag-over'));
-    });
-
+    dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    ['dragleave', 'dragend'].forEach(type => dropZone.addEventListener(type, () => dropZone.classList.remove('drag-over')));
     dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
         dropZone.classList.remove('drag-over');
         const file = e.dataTransfer.files[0];
         if (file && file.name.endsWith('.csv')) handleFile(file);
     });
-
-    fileInput.addEventListener('change', (e) => {
-        if (e.target.files[0]) handleFile(e.target.files[0]);
-    });
+    fileInput.addEventListener('change', (e) => { if (e.target.files[0]) handleFile(e.target.files[0]); });
 
     function handleFile(file) {
-        // Tady si uložíme název původního souboru bez .csv
         inputFileName = file.name.replace(/\.[^/.]+$/, "");
-
         const reader = new FileReader();
         reader.onload = (ev) => processData(ev.target.result);
         reader.readAsText(file, 'windows-1250');
     }
 
-    // 3. Zpracování dat
     function processData(text) {
         const lines = text.split(/\r?\n/).filter(l => l.trim().length > 10);
         const tbody = document.querySelector('#resultTable tbody');
         tbody.innerHTML = '';
-        let ok = 0, miss = 0; exportRows = [];
+        let ok = 0, miss = 0;
 
         lines.forEach((line) => {
             const cols = line.split(';').map(c => c.trim().replace(/^"|"$/g, ''));
@@ -131,49 +118,43 @@
 
             const pNameOrig = cols[0];
             const pNameUpper = pNameOrig.toUpperCase().replace(/_/g, " ");
-            const pW = cols[1]; const pH = cols[3]; const pT = cols[5];
-            const pCount = parseInt(cols[6]) || 1;
-            const pMat = cols[7]; const matUpper = pMat.toUpperCase();
+            const pW = cols[1], pH = cols[3], pT = cols[5], pCount = cols[6], pMat = cols[7];
+            const matUpper = pMat.toUpperCase();
 
-            let rawT = parseFloat(pT.replace(',', '.'));
-            let targetT = Math.floor(rawT);
-            let targetCat = "DTDL"; let isTupl = "NE";
+            let rawT = parseFloat(pT.replace(',', '.')), targetT = Math.floor(rawT);
+            let targetCat = "DTDL", isTupl = "NE";
 
-            if (pNameUpper.includes("HDF") || pNameUpper.includes("ZADA") || targetT === 3) {
-                targetT = 3; targetCat = "HDF";
+            if (pNameUpper.includes("HDF") || targetT === 3) {
+                targetT = 3;
+                targetCat = "HDF";
+            } else if (pNameUpper.includes("ZADA")) {
+                targetT = 10;
+                targetCat = "DTDL";
             } else if (pNameUpper.includes("TUPL") || targetT === 36) {
-                targetT = 18; targetCat = "DTDL"; isTupl = "ANO";
+                targetT = 18;
+                isTupl = "ANO";
             } else if (pNameUpper.includes("PRACOVNI") || pNameUpper.includes("PD")) {
-                targetCat = "PD"; targetT = 38;
+                targetCat = "PD";
+                targetT = 38;
             } else if (pNameUpper.includes("ZASTENA")) {
-                targetCat = "ZASTENA"; targetT = 10;
+                targetCat = "ZASTENA";
+                targetT = 10;
             }
 
             let match = DB.find(item => {
-                const dCode = (item.d || "").toUpperCase();
-                const dId = (item.c || "").toUpperCase();
-                const dMatch = (dCode && matUpper.includes(dCode)) || (dId && matUpper.includes(dId));
-                return dMatch && parseInt(item.t) === targetT && item.cat === targetCat;
+                const dc = (item.d || "").toUpperCase(), di = (item.c || "").toUpperCase();
+                return ((dc && matUpper.includes(dc)) || (di && matUpper.includes(di))) && parseInt(item.t) === targetT && item.cat === targetCat;
             });
-
             if (!match) {
                 match = DB.find(item => {
-                    const dCode = (item.d || "").toUpperCase();
-                    const dId = (item.c || "").toUpperCase();
-                    const dMatch = (dCode && matUpper.includes(dCode)) || (dId && matUpper.includes(dId));
-                    return dMatch && parseInt(item.t) === targetT;
+                    const dc = (item.d || "").toUpperCase(), di = (item.c || "").toUpperCase();
+                    return ((dc && matUpper.includes(dc)) || (di && matUpper.includes(di))) && parseInt(item.t) === targetT;
                 });
             }
 
-            const poznamkaFinal = `${pMat}, ${pT}mm`;
-            if (match) {
-                ok++;
-                addRowToTable(match, pNameOrig, pT, isTupl, poznamkaFinal);
-                exportRows.push([match.c, pNameOrig, pW, pH, pCount, "", "", "", "", "", isTupl, poznamkaFinal]);
-            } else {
-                miss++;
-                addErrorRowToTable(pNameOrig, pMat, pT, poznamkaFinal);
-            }
+            const rowData = { n: pNameOrig, w: pW, h: pH, c: pCount, tupl: isTupl, note: `${pMat}, ${pT}mm` };
+            if (match) { ok++; addRow(match.c, rowData, pT, false); }
+            else { miss++; addRow("Nenalezeno", rowData, pT, true); }
         });
 
         document.getElementById('statOk').innerText = ok;
@@ -181,51 +162,38 @@
         document.getElementById('statTotal').innerText = ok + miss;
         document.getElementById('statsArea').classList.remove('hidden');
         document.getElementById('tableWrapper').classList.remove('hidden');
-        document.getElementById('downloadBtn').classList.toggle('hidden', ok === 0);
-
-        // Scroll dolů k výsledkům
+        document.getElementById('downloadBtn').classList.remove('hidden');
         document.getElementById('statsArea').scrollIntoView({ behavior: 'smooth' });
     }
 
-    function addRowToTable(match, pName, pT, isTupl, poznamka) {
+    function addRow(code, data, pT, isMiss) {
         const tr = document.createElement('tr');
         tr.className = "hover:bg-blue-50 transition-colors";
-        tr.innerHTML = `
-                <td class="px-6 py-4 font-mono font-bold text-blue-600">${match.c}</td>
-                <td class="px-6 py-4"><div class="text-sm font-bold text-slate-800">${pName}</div><div class="text-[10px] text-slate-400 italic">${poznamka}</div></td>
-                <td class="px-6 py-4 text-center font-mono text-xs text-slate-500">${pT} mm</td>
-                <td class="px-6 py-4 text-right"><span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded text-[9px] font-black border border-emerald-200 uppercase">${isTupl === 'ANO' ? 'TUPL OK' : 'OK'}</span></td>
-            `;
-        document.querySelector('#resultTable tbody').appendChild(tr);
-    }
+        tr.dataset.w = data.w; tr.dataset.h = data.h; tr.dataset.c = data.c; tr.dataset.tupl = data.tupl; tr.dataset.note = data.note; tr.dataset.name = data.n;
 
-    function addErrorRowToTable(pName, pMat, pT, poznamka) {
-        const tr = document.createElement('tr');
-        tr.className = "bg-rose-50/50";
         tr.innerHTML = `
-                <td class="px-6 py-4 text-rose-300 italic text-xs">Nenalezeno</td>
-                <td class="px-6 py-4"><div class="text-sm font-bold text-slate-400">${pName}</div><div class="text-[10px] text-rose-400 italic font-bold underline">${poznamka}</div></td>
-                <td class="px-6 py-4 text-center font-mono text-xs text-slate-300">${pT} mm</td>
-                <td class="px-6 py-4 text-right"><span class="bg-rose-500 text-white px-3 py-1 rounded text-[9px] font-black uppercase shadow-sm">MISS</span></td>
-            `;
+            <td contenteditable="true" class="demos-code px-6 py-4 font-mono font-bold ${isMiss ? 'text-rose-400 italic' : 'text-blue-600'}">${code}</td>
+            <td class="px-6 py-4"><div class="text-sm font-bold text-slate-800">${data.n}</div><div class="text-[10px] text-slate-400 italic">${data.note}</div></td>
+            <td class="px-6 py-4 text-center font-mono text-xs text-slate-500">${pT} mm</td>
+            <td class="px-6 py-4 text-right"><span class="${isMiss ? 'bg-rose-500 text-white' : 'bg-emerald-100 text-emerald-700 border-emerald-200'} px-3 py-1 rounded text-[9px] font-black border uppercase">${isMiss ? 'MISS' : (data.tupl === 'ANO' ? 'TUPL OK' : 'OK')}</span></td>
+        `;
         document.querySelector('#resultTable tbody').appendChild(tr);
     }
 
     document.getElementById('downloadBtn').addEventListener('click', function() {
         const now = new Date();
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const dd = String(now.getDate()).padStart(2, '0');
-        const yyyy = now.getFullYear();
-        const hh = String(now.getHours()).padStart(2, '0');
-        const min = String(now.getMinutes()).padStart(2, '0');
-        const ss = String(now.getSeconds()).padStart(2, '0');
+        const timeStamp = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}-${now.getFullYear()}_${String(now.getHours()).padStart(2,'0')}-${String(now.getMinutes()).padStart(2,'0')}-${String(now.getSeconds()).padStart(2,'0')}`;
 
-        // Pro název souboru musíme použít tečky nebo pomlčky místo dvojteček
-        const timeStamp = `${mm}-${dd}-${yyyy}_${hh}-${min}-${ss}`;
+        let csv = "KOD MATERIALU;NÁZEV;DÉLKA;ŠÍŘKA;POČET KS;MÁ LÉTA;HRANA PŘEDNÍ KOD;HRANA ZADNI KOD;HRANA LEVA KOD;HRANA PRAVA KOD;TUPLOVANÁ DESKA;POZNÁMKA\n";
 
-        const header = "KOD MATERIALU;NÁZEV;DÉLKA;ŠÍŘKA;POČET KS;MÁ LÉTA;HRANA PŘEDNÍ KOD;HRANA ZADNI KOD;HRANA LEVA KOD;HRANA PRAVA KOD;TUPLOVANÁ DESKA;POZNÁMKA\n";
-        let csv = header;
-        exportRows.forEach(r => csv += r.join(';') + "\n");
+        document.querySelectorAll('#resultTable tbody tr').forEach(tr => {
+            const code = tr.querySelector('.demos-code').innerText.trim();
+            if (code && code !== "Nenalezeno") {
+                const d = tr.dataset;
+                csv += `${code};${d.name};${d.w};${d.h};${d.c};ANO;;;;;${d.tupl};${d.note}\n`;
+            }
+        });
+
         const blob = new Blob(["\ufeff" + csv], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
