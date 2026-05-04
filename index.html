@@ -175,7 +175,7 @@
             <td contenteditable="true" class="demos-code px-6 py-4 font-mono font-bold ${isMiss ? 'text-rose-400 italic' : 'text-blue-600'}">${code}</td>
             <td class="px-6 py-4"><div class="text-sm font-bold text-slate-800">${data.n}</div><div class="text-[10px] text-slate-400 italic">${data.note}</div></td>
             <td class="px-6 py-4 text-center font-mono text-xs text-slate-500">${pT} mm</td>
-            <td class="px-6 py-4 text-right"><span class="${isMiss ? 'bg-rose-500 text-white' : 'bg-emerald-100 text-emerald-700 border-emerald-200'} px-3 py-1 rounded text-[9px] font-black border uppercase">${isMiss ? 'MISS' : (data.tupl === 'ANO' ? 'TUPL OK' : 'OK')}</span></td>
+            <td class="px-6 py-4 text-right"><span class="${isMiss ? 'bg-rose-500 text-white' : 'bg-emerald-100 text-emerald-700 border-emerald-200'} px-3 py-1 rounded text-[9px] font-black border uppercase">${isMiss ? 'MISS' : (data.tupl === 'ANO' ? 'OK' : 'OK')}</span></td>
         `;
         document.querySelector('#resultTable tbody').appendChild(tr);
     }
